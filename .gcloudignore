@@ -16,3 +16,7 @@
 # Node.js dependencies:
 node_modules/
 credential/
+build/
+dist/
+audio/
+.idea/

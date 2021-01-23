@@ -1,28 +1,34 @@
-enum nameType {
+import { protos } from '@google-cloud/text-to-speech';
+
+enum NameType {
   firstName,
   lastName,
   midName,
   suffix
 }
 
-interface Name {
-  type: nameType;
+export interface Name {
+  type: NameType;
   text: string;
   ssml: string;
+  ssmlGender: protos.google.cloud.texttospeech.v1.SsmlVoiceGender;
   language: string;
   audio: string;
-  option: Object;
 }
 
-interface UserForm {
+export interface UserForm {
   username: string;
   names: Name[];
   password: string;
+  option: Object;
 }
 
-interface UserModel {
+export interface UserModel {
   names: Name[];
   password: string;
+  option: Object;
 }
+
+//
 
 
