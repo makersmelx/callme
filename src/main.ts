@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import users from './users/handler';
+import * as _ from 'lodash';
+
 const app = express();
-const db = require('./database');
-const users = require('./users');
 app.get('/', (req, res) => {
   res.send('Hello');
 });
