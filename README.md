@@ -1,12 +1,8 @@
 ### Note
-This repository cannot work currently.
+This repository can work currently.
 
 ### Command
 ~~~
-KEY_PATH=path/to/secretKey.json npm run start
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/google/cred/json npm run start
 ~~~
 
-When on Google App Engine
-~~~
-npm run start
-~~~

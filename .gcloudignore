@@ -15,8 +15,9 @@
 
 # Node.js dependencies:
 node_modules/
+
+# google credential file
 credential/
-build/
-dist/
-audio/
+
+# development cache
 .idea/
