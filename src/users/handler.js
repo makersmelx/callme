@@ -1,41 +1,43 @@
-import utils from '../utils';
-import express from 'express';
-import db from '../database.js';
-import ssmlAudio from '../ssmlAudio/handler.js';
-import bodyParser from 'body-parser';
 import multer from 'multer';
+import bodyParser from 'body-parser';
+import express from 'express';
+import utils from '../utils';
+import db from '../database';
+import ssmlAudio from '../ssmlAudio/handler';
 
 const router = express.Router();
 const dbCollection = db.collection('users');
 const upload = multer();
 
-router.use(bodyParser.json()); // for parsing application/json
-router.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get('/:username', ((req, res) => {
   const { username } = req.params;
-  let userRef = dbCollection.doc(username);
-  userRef.get().then(doc => {
+  const userRef = dbCollection.doc(username);
+  userRef.get().then((doc) => {
     if (!doc.exists) {
       res.status(404).send('Data not found');
     } else {
       res.send(doc.data());
     }
-  }).catch(err => {
+  }).catch(() => {
     throw new Error('Unknown error');
   });
 }));
 
 router.post('/', upload.array(), async (req, res) => {
-  let reqBody = req.body;
-  let userRef = dbCollection.doc(reqBody.username);
+  const reqBody = req.body;
+  const userRef = dbCollection.doc(reqBody.username);
   const userData = {
     password: utils.SHA256Encrypt(reqBody.password),
     names: [...reqBody.names],
-    option: { ...reqBody.option }
+    option: { ...reqBody.option },
   };
   // fetch ssmlAudio
-  for (let name of (userData.names)) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const name of (userData.names)) {
+    // eslint-disable-next-line no-await-in-loop
     name.audio = await ssmlAudio.fetchSSMLAudio(name, reqBody.username);
   }
   userRef.set({ ...userData }).then((message) => {
@@ -45,17 +47,22 @@ router.post('/', upload.array(), async (req, res) => {
   });
 });
 
-router.put('/:username', upload.array(), async (req, res) => {
-  const { username } = req.params;
-  let userRef = dbCollection.doc(username);
-  const serverData = await userRef.get().then(doc => {
+router.put('/', upload.array(), async (req, res) => {
+  const reqBody = req.body;
+  const { username } = reqBody;
+  const userRef = dbCollection.doc(username);
+  const serverData = await userRef.get().then((doc) => {
     if (!doc.exists) {
       res.status(404).send('Data not found');
-    } else {
-      return Promise.resolve(doc.data());
+      return Promise.resolve(undefined);
     }
+    return Promise.resolve(doc.data());
   });
-  let reqBody = req.body;
+  // todo: improve error handler
+  if (!serverData) {
+    return;
+  }
+
   if (utils.SHA256Encrypt(reqBody.password) !== serverData.password) {
     res.status(403).send('Incorrect password');
     return;
@@ -63,13 +70,15 @@ router.put('/:username', upload.array(), async (req, res) => {
   const userData = {
     password: serverData.password,
     names: [...reqBody.names],
-    option: { ...reqBody.option }
+    option: { ...reqBody.option },
   };
   // selectively update ssmlAudio
+  // eslint-disable-next-line no-restricted-syntax
   for (const [index, name] of (userData.names).entries()) {
     if (name.ssml !== serverData.names[index].ssml) {
       // set back to current mp3 url
       name.audio = serverData.names[index].audio;
+      // eslint-disable-next-line no-await-in-loop
       name.audio = await ssmlAudio.fetchSSMLAudio(name);
     } else {
       name.audio = serverData.names[index].audio;
@@ -83,5 +92,5 @@ router.put('/:username', upload.array(), async (req, res) => {
 });
 
 export default {
-  router
+  router,
 };

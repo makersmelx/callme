@@ -1,7 +1,7 @@
 import express from 'express';
+import urls from './server/urls';
 import users from './users';
 import ssmlAudio from './ssmlAudio';
-import urls from 'server/urls';
 
 const app = express();
 
@@ -27,5 +27,6 @@ app.use(urls.ssmlAudio, ssmlAudio.router);
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Server listening on port ${PORT}...`);
 });
