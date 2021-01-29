@@ -1,9 +1,9 @@
 const path = require('path');
+
 const ROOT_PATH = path.resolve(__dirname);
 const SRC_PATH = path.resolve(ROOT_PATH, 'src');
 const DIST_PATH = path.join(__dirname, 'dist');
-const isProduction = process.env.NODE_ENV === 'production' ||
-  process.env.GOOGLE_APPLICATION_CREDENTIALS === undefined;
+const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
   entry: path.join(SRC_PATH, 'main.js'),
@@ -13,7 +13,7 @@ module.exports = {
     compress: true,
     port: 8000,
     hot: true,
-    contentBase: false
+    contentBase: false,
   },
   devtool: 'inline-source-map',
   module: {
@@ -39,8 +39,9 @@ module.exports = {
             // optional, custom functional asset emitter
             // takes an asset path and returns the replacement
             // or returns false to skip emission
-            customEmit: (path, { id, isRequire }) => false |
-              './ssmlAudio/*',
+            // eslint-disable-next-line no-shadow,no-unused-vars,no-bitwise
+            customEmit: (path, { id, isRequire }) => false
+              | './ssmlAudio/*',
             // optional, a list of asset names already emitted or
             // defined that should not be emitted
             existingAssetNames: [],
@@ -48,19 +49,19 @@ module.exports = {
             // build for process.env.NODE_ENV = 'production'
             production: isProduction, // optional, default is undefined
             cwd: process.cwd(), // optional, default
-            debugLog: false // optional, default
-          }
-        }
-      }
-    ]
+            debugLog: false, // optional, default
+          },
+        },
+      },
+    ],
   },
   output: {
     filename: 'main.js',
     path: DIST_PATH,
-    publicPath: '/'
+    publicPath: '/',
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
-    modules: [SRC_PATH, 'node_modules']
-  }
+    modules: [SRC_PATH, 'node_modules'],
+  },
 };

@@ -4,11 +4,14 @@
   "description": "",
   "entry": "dist/main.js",
   "scripts": {
-    "prestart": "if [ ! -d \"ssmlAudio\" ];then mkdir \"ssmlAudio\"; fi && webpack",
+    "build.dev": "if [ ! -d \"ssmlAudio\" ];then mkdir \"ssmlAudio\"; fi && webpack",
+    "build.prod": "if [ ! -d \"ssmlAudio\" ];then mkdir \"ssmlAudio\"; fi && NODE_ENV=production webpack",
+    "prestart": "npm run build.dev",
     "start": "node dist/main.js",
     "lint": "eslint src/* --no-error-on-unmatched-pattern",
     "postinstall": "npx husky install",
-    "pre-commit": "npm run lint"
+    "pre-commit": "npm run lint",
+    "pre-push": "npm run build.prod && gcloud app deploy"
   },
   "author": "makersmelx",
   "license": "MIT",
