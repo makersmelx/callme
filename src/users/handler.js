@@ -31,12 +31,15 @@ router.post('/', upload.array(), async (req, res) => {
   const userRef = dbCollection.doc(reqBody.username);
   const userData = {
     password: utils.SHA256Encrypt(reqBody.password),
-    names: [...reqBody.names],
+    names: { ...reqBody.names },
     option: { ...reqBody.option },
   };
   // fetch ssmlAudio
-  for (const name of (userData.names)) {
-    name.audio = await ssmlAudio.fetchSSMLAudio(name, reqBody.username);
+  for (const key of Object.keys(userData.names)) {
+    const name = userData.names[key];
+    if (name.ssml) {
+      name.audio = await ssmlAudio.fetchSSMLAudio(name, reqBody.username);
+    }
   }
   userRef.set({ ...userData }).then((message) => {
     res.send(message);
@@ -67,17 +70,21 @@ router.put('/', upload.array(), async (req, res) => {
   }
   const userData = {
     password: serverData.password,
-    names: [...reqBody.names],
+    names: { ...reqBody.names },
     option: { ...reqBody.option },
   };
   // selectively update ssmlAudio
-  for (const [index, name] of (userData.names).entries()) {
-    if (name.ssml !== serverData.names[index].ssml) {
-      // set back to current mp3 url
-      name.audio = serverData.names[index].audio;
-      name.audio = await ssmlAudio.fetchSSMLAudio(name);
-    } else {
-      name.audio = serverData.names[index].audio;
+  for (const key of Object.keys(userData.names)) {
+    const name = userData.names[key];
+    if (name.ssml) {
+      if (!serverData.names[key].ssml || name.ssml
+        !== serverData.names[key].ssml) {
+        // set back to current mp3 url
+        name.audio = serverData.names[key].audio;
+        name.audio = await ssmlAudio.fetchSSMLAudio(name);
+      } else {
+        name.audio = serverData.names[key].audio;
+      }
     }
   }
   userRef.set({ ...userData }).then((message) => {
