@@ -35,9 +35,7 @@ router.post('/', upload.array(), async (req, res) => {
     option: { ...reqBody.option },
   };
   // fetch ssmlAudio
-  // eslint-disable-next-line no-restricted-syntax
   for (const name of (userData.names)) {
-    // eslint-disable-next-line no-await-in-loop
     name.audio = await ssmlAudio.fetchSSMLAudio(name, reqBody.username);
   }
   userRef.set({ ...userData }).then((message) => {
@@ -73,12 +71,10 @@ router.put('/', upload.array(), async (req, res) => {
     option: { ...reqBody.option },
   };
   // selectively update ssmlAudio
-  // eslint-disable-next-line no-restricted-syntax
   for (const [index, name] of (userData.names).entries()) {
     if (name.ssml !== serverData.names[index].ssml) {
       // set back to current mp3 url
       name.audio = serverData.names[index].audio;
-      // eslint-disable-next-line no-await-in-loop
       name.audio = await ssmlAudio.fetchSSMLAudio(name);
     } else {
       name.audio = serverData.names[index].audio;
