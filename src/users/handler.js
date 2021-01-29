@@ -19,7 +19,9 @@ router.get('/:username', ((req, res) => {
     if (!doc.exists) {
       res.status(404).send('Data not found');
     } else {
-      res.send(doc.data());
+      const data = doc.data();
+      delete data.password;
+      res.send(data);
     }
   }).catch(() => {
     throw new Error('Unknown error');
