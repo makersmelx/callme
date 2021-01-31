@@ -1,27 +1,12 @@
 import winston from 'winston';
-import fs from 'fs';
-import config from './config';
+import { LoggingWinston } from '@google-cloud/logging-winston';
 
-fs.access(config.logger.logDir, fs.constants.F_OK, (notExist) => {
-  if (notExist) {
-    fs.mkdir(config.logger.logDir, { recursive: true }, (err) => {
-      if (err) {
-        console.error('Fail to create log directory.');
-        process.exit(1);
-      }
-    });
-  }
-});
+const loggingWinston = new LoggingWinston();
 
 const { format } = winston;
 const logger = winston.createLogger({
   transports: [
-    new winston.transports.File(
-      { filename: config.logger.errorLog, level: 'error' },
-    ),
-    new winston.transports.File(
-      { filename: config.logger.infoLog, level: 'info' },
-    ),
+    loggingWinston,
   ],
   format: format.combine(
     format.timestamp({
