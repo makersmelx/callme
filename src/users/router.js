@@ -2,11 +2,11 @@ import multer from 'multer';
 import bodyParser from 'body-parser';
 import express from 'express';
 import utils from '../utils';
-import db from '../database';
-import ssmlAudio from '../ssmlAudio/handler';
+import firebase from '../firebase';
+import ssmlAudio from '../ssmlAudio';
 
 const router = express.Router();
-const dbCollection = db.collection('users');
+const dbCollection = firebase.database.collection('users');
 const upload = multer();
 
 router.use(bodyParser.json());
@@ -79,13 +79,12 @@ router.put('/', upload.array(), async (req, res) => {
   for (const key of Object.keys(userData.names)) {
     const name = userData.names[key];
     if (name.ssml) {
+      // set back to current audio url
+      name.audio = serverData.names[key].audio;
+      // if the ssml text has been changed in this update, update the audio
       if (!serverData.names[key].ssml || name.ssml
         !== serverData.names[key].ssml) {
-        // set back to current mp3 url
-        name.audio = serverData.names[key].audio;
         name.audio = await ssmlAudio.fetchSSMLAudio(name);
-      } else {
-        name.audio = serverData.names[key].audio;
       }
     }
   }

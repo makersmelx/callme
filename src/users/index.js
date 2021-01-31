@@ -1,5 +1,5 @@
-import handler from './handler';
+import router from './router';
 
 export default {
-  ...handler,
+  ...router,
 };
