@@ -4,3 +4,5 @@ credential/
 build/
 dist/
 /ssmlAudio/
+log/
+.DS_Store

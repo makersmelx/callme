@@ -21,3 +21,4 @@ credential/
 
 # development cache
 .idea/
+log/

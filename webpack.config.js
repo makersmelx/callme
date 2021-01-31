@@ -9,13 +9,7 @@ module.exports = {
   entry: path.join(SRC_PATH, 'main.js'),
   mode: isProduction ? 'production' : 'development',
   target: 'node',
-  devServer: {
-    compress: true,
-    port: 8000,
-    hot: true,
-    contentBase: false,
-  },
-  devtool: 'inline-source-map',
+  devtool: 'eval-source-map',
   module: {
     rules: [
       {
@@ -40,8 +34,7 @@ module.exports = {
             // takes an asset path and returns the replacement
             // or returns false to skip emission
             // eslint-disable-next-line no-shadow,no-unused-vars,no-bitwise
-            customEmit: (path, { id, isRequire }) => false
-              | './ssmlAudio/*',
+            customEmit: (path, { id, isRequire }) => false | '"./log"',
             // optional, a list of asset names already emitted or
             // defined that should not be emitted
             existingAssetNames: [],
@@ -58,7 +51,6 @@ module.exports = {
   output: {
     filename: 'main.js',
     path: DIST_PATH,
-    publicPath: '/',
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
