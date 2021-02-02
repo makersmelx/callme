@@ -4,6 +4,7 @@ import express from 'express';
 import utils from '../utils';
 import firebase from '../firebase';
 import ssmlAudio from '../ssmlAudio';
+import logger from '../logger';
 
 const router = express.Router();
 const dbCollection = firebase.database.collection('users');
@@ -17,7 +18,9 @@ router.get('/:username', ((req, res) => {
   const userRef = dbCollection.doc(username);
   userRef.get().then((doc) => {
     if (!doc.exists) {
-      res.status(404).send('Data not found');
+      res.status(404).send(
+        `Document ${username} does not exist or you have no access to it`,
+      );
     } else {
       const data = doc.data();
       delete data.password;
@@ -43,9 +46,13 @@ router.post('/', upload.array(), async (req, res) => {
       name.audio = await ssmlAudio.fetchSSMLAudio(name, reqBody.username);
     }
   }
-  userRef.set({ ...userData }).then((message) => {
+  userRef.set({ ...userData }).then(() => {
+    const message = `Create document ${reqBody.username}: ${userData.toString()}`;
+    logger.info(message);
     res.send(message);
-  }, (errMessage) => {
+  }, () => {
+    const errMessage = `Fail to create document ${reqBody.username}`;
+    logger.error(errMessage);
     res.status(404).send(errMessage);
   });
 });
@@ -56,18 +63,22 @@ router.put('/', upload.array(), async (req, res) => {
   const userRef = dbCollection.doc(username);
   const serverData = await userRef.get().then((doc) => {
     if (!doc.exists) {
-      res.status(404).send('Data not found');
       return Promise.resolve(undefined);
     }
     return Promise.resolve(doc.data());
   });
   // todo: improve error handler
   if (!serverData) {
+    res.status(404).send(
+      `Document ${username} does not exist or you have no access to it`,
+    );
     return;
   }
 
   if (utils.SHA256Encrypt(reqBody.password) !== serverData.password) {
-    res.status(403).send('Incorrect password');
+    res.status(404).send(
+      `Document ${username} does not exist or you have no access to it`,
+    );
     return;
   }
   const userData = {
@@ -88,9 +99,13 @@ router.put('/', upload.array(), async (req, res) => {
       }
     }
   }
-  userRef.set({ ...userData }).then((message) => {
+  userRef.set({ ...userData }).then(() => {
+    const message = `Update document ${reqBody.username}: ${userData.toString()}`;
+    logger.info(message);
     res.send(message);
-  }, (errMessage) => {
+  }, () => {
+    const errMessage = `Fail to update document ${reqBody.username}`;
+    logger.error(errMessage);
     res.status(404).send(errMessage);
   });
 });

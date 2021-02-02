@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import firebase from '../firebase';
 import config from '../config';
 import logger from '../logger';
@@ -18,7 +19,10 @@ router.delete('/:filePath', (req, res) => {
           logger.error(errorMessage);
           res.status(errRes.code).send(errorMessage);
         } else {
-          res.send('Successfully delete');
+          const logInfo = `Delete file ${path.join(config.storageBaseURL,
+            filePath)}`;
+          logger.info(logInfo);
+          res.send(logInfo);
         }
       }));
     }
