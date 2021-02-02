@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import config from '../config';
 import urls from '../server/urls';
 import firebase from '../firebase';
-import logger from '../logger';
+import logger from '../utils/logger';
+import { CallMeError } from '../utils';
 
 const client = new TextToSpeechClient();
 const bucket = firebase.storage.bucket(config.bucketName);
@@ -20,15 +21,16 @@ const fetchSSMLAudio = async (name) => {
   if (audio.length > 0) {
     // delete current audio file if it exists
     const deleteFile = bucket.file(audio);
-    // eslint-disable-next-line no-unused-vars
-    deleteFile.delete((errRes, apiResponse) => {
-      if (errRes) {
-        const errorMessage = errRes.errors[0].message;
-        logger.error(errorMessage);
-      } else {
+    try {
+      await deleteFile.delete().then(() => {
         logger.info(`Delete file ${path.join(config.storageBaseURL, audio)}`);
-      }
-    });
+      }, (errRes) => Promise.reject(new CallMeError({
+        code: errRes.code,
+        message: errRes.errors[0].message,
+      })));
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
   const request = {
     input: { ssml },
@@ -40,16 +42,19 @@ const fetchSSMLAudio = async (name) => {
   const audioName = path.join(`${uuidv4()}.mp3`);
   const audioBucketPath = path.join(path.basename(urls.ssmlAudio), audioName);
   const file = bucket.file(audioBucketPath);
-  file.save(response.audioContent, (errRes) => {
-    if (errRes) {
-      const errorMessage = errRes.errors[0].message;
-      logger.error(errorMessage);
-    } else {
+  // upload file to the cloud
+  try {
+    await file.save(response.audioContent).then(() => {
       logger.info(
         `Upload file at ${path.join(config.storageBaseURL, audioName)}`,
       );
-    }
-  });
+    }, (errRes) => Promise.reject(new CallMeError({
+      code: errRes.code,
+      message: errRes.errors[0].message,
+    })));
+  } catch (err) {
+    return Promise.reject(err);
+  }
   return Promise.resolve(audioBucketPath);
 };
 

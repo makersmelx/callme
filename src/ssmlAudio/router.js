@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import firebase from '../firebase';
 import config from '../config';
-import logger from '../logger';
+import logger from '../utils/logger';
 import { handleError } from '../utils';
 
 const router = express.Router();
