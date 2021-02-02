@@ -10,7 +10,6 @@ export class CallMeError extends Error {
 
 export const handleError = (controller) => async (req, res, next) => {
   try {
-    logger.warn(2);
     await controller(req, res, next);
   } catch (err) {
     next(err);

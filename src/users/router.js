@@ -2,7 +2,7 @@ import multer from 'multer';
 import bodyParser from 'body-parser';
 import express from 'express';
 import {
-  SHA256Encrypt, handleError, logger, CallMeError,
+  SHA256Encrypt, handleError, logger, CallMeError, redact,
 } from '../utils';
 import firebase from '../firebase';
 import fetchSSMLAudio from './fetchSSMLAudio';
@@ -39,7 +39,6 @@ router.put('/*', handleError(async (req, res, next) => {
 }));
 
 router.get('/:username', handleError(async (req, res) => {
-  logger.info('22');
   const { username } = req.params;
   const userRef = dbCollection.doc(username);
 
@@ -73,7 +72,7 @@ router.post('/', handleError(async (req, res) => {
   }
   await userRef.set({ ...userData }).then(() => {
     const message = `Create document ${reqBody.username}`;
-    logger.info(`${message}: ${JSON.stringify(userData)}`);
+    logger.info(`${message}: ${JSON.stringify(redact.map(userData))}`);
     res.send(message);
   }, () => Promise.reject(new CallMeError({
     code: 404,
@@ -106,7 +105,7 @@ router.put('/', handleError(async (req, res) => {
   }
   userRef.set({ ...userData }).then(() => {
     const message = `Update document ${reqBody.username}`;
-    logger.info(`${message}: ${JSON.stringify(userData)}`);
+    logger.info(`${message}: ${JSON.stringify(redact.map(userData))}`);
     res.send(message);
   }, () => Promise.reject(new CallMeError({
     code: 404,
