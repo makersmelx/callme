@@ -22,6 +22,7 @@
     "express": "^4.17.1",
     "firebase": "^8.2.4",
     "firebase-admin": "^9.4.2",
+    "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "redact-secrets": "^1.0.0",
     "uuid": "^8.3.2",
