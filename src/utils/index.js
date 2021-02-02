@@ -1,5 +1,2 @@
-import encrypt from './encrypt';
-
-export default {
-  ...encrypt,
-};
+export * from './encrypt';
+export * from './handleError';

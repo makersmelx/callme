@@ -3,11 +3,12 @@ import path from 'path';
 import firebase from '../firebase';
 import config from '../config';
 import logger from '../logger';
+import { handleError } from '../utils';
 
 const router = express.Router();
 const bucket = firebase.storage.bucket(config.bucketName);
 
-router.delete('/:filePath', (req, res) => {
+router.delete('/:filePath', handleError((req, res) => {
   const { filePath } = req.params;
   const file = bucket.file(filePath);
   file.exists((err, exists) => {
@@ -27,7 +28,7 @@ router.delete('/:filePath', (req, res) => {
       }));
     }
   });
-});
+}));
 
 export default {
   router,

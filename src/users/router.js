@@ -1,7 +1,7 @@
 import multer from 'multer';
 import bodyParser from 'body-parser';
 import express from 'express';
-import utils from '../utils';
+import { SHA256Encrypt, handleError } from '../utils';
 import firebase from '../firebase';
 import fetchSSMLAudio from './fetchSSMLAudio';
 import logger from '../logger';
@@ -13,7 +13,7 @@ const upload = multer();
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.put('/*', (async (req, res, next) => {
+router.put('/*', handleError(async (req, res, next) => {
   const reqBody = req.body;
   const { username } = reqBody;
   const userRef = dbCollection.doc(username);
@@ -31,7 +31,7 @@ router.put('/*', (async (req, res, next) => {
     return;
   }
 
-  if (utils.SHA256Encrypt(reqBody.password) !== serverData.password) {
+  if (SHA256Encrypt(reqBody.password) !== serverData.password) {
     res.status(404).send(
       `Document ${username} does not exist or you have no access to it`,
     );
@@ -41,7 +41,7 @@ router.put('/*', (async (req, res, next) => {
   next();
 }));
 
-router.get('/:username', ((req, res) => {
+router.get('/:username', handleError((req, res) => {
   const { username } = req.params;
   const userRef = dbCollection.doc(username);
   userRef.get().then((doc) => {
@@ -59,11 +59,11 @@ router.get('/:username', ((req, res) => {
   });
 }));
 
-router.post('/', upload.array(), async (req, res) => {
+router.post('/', upload.array(), handleError(async (req, res) => {
   const reqBody = req.body;
   const userRef = dbCollection.doc(reqBody.username);
   const userData = {
-    password: utils.SHA256Encrypt(reqBody.password),
+    password: SHA256Encrypt(reqBody.password),
     names: { ...reqBody.names },
     option: { ...reqBody.option },
   };
@@ -83,9 +83,9 @@ router.post('/', upload.array(), async (req, res) => {
     logger.error(errMessage);
     res.status(404).send(errMessage);
   });
-});
+}));
 
-router.put('/', upload.array(), async (req, res) => {
+router.put('/', upload.array(), handleError(async (req, res) => {
   const reqBody = req.body;
   const { username } = reqBody;
   const userRef = dbCollection.doc(username);
@@ -118,6 +118,6 @@ router.put('/', upload.array(), async (req, res) => {
     logger.error(errMessage);
     res.status(404).send(errMessage);
   });
-});
+}));
 
 export default router;
