@@ -53,6 +53,4 @@ const fetchSSMLAudio = async (name) => {
   return Promise.resolve(audioBucketPath);
 };
 
-export default {
-  fetchSSMLAudio,
-};
+export default fetchSSMLAudio;
