@@ -1,5 +1,3 @@
-import multer from 'multer';
-import bodyParser from 'body-parser';
 import express from 'express';
 import {
   SHA256Encrypt, handleError, logger, CallMeError, redact,
@@ -9,11 +7,6 @@ import fetchSSMLAudio from './fetchSSMLAudio';
 
 const router = express.Router();
 const dbCollection = firebase.database.collection('users');
-const upload = multer();
-
-router.use(bodyParser.json());
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(upload.array());
 
 router.put('/*', handleError(async (req, res, next) => {
   const reqBody = req.body;
