@@ -4,7 +4,8 @@ import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import config from '../config';
 import file from './file';
 import logger from '../utils/logger';
-import { handleError, mkdirTree } from '../utils';
+import { CallMeError, handleError, mkdirTree } from '../utils';
+import fetchSSMLAudio from '../users/fetchSSMLAudio';
 
 const router = express.Router();
 
@@ -34,6 +35,26 @@ router.get('/supportedList', handleError(async (req, res) => {
       });
     res.json(voices);
   }
+}));
+
+router.post('/', handleError(async (req, res, next) => {
+  const { ssml, language, ssmlGender } = req.body;
+  if (!(ssml && language && ssmlGender)) {
+    return Promise.reject(new CallMeError({
+      code: 400,
+      message: 'Missing ssml or language or ssmlGender',
+    }));
+  }
+  next();
+}), handleError(async (req, res) => {
+  const { ssml, language, ssmlGender } = req.body;
+  const name = {
+    ssml,
+    language,
+    ssmlGender,
+    audio: '',
+  };
+  res.send(await fetchSSMLAudio(name));
 }));
 
 export default {
