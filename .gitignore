@@ -6,3 +6,4 @@ dist/
 /ssmlAudio/
 log/
 .DS_Store
+cache/

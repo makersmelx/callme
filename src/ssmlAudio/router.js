@@ -1,17 +1,36 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import firebase from '../firebase';
 import config from '../config';
 import logger from '../utils/logger';
-import { CallMeError, handleError } from '../utils';
+import { CallMeError, handleError, mkdirTree } from '../utils';
 import urls from '../server/urls';
 
 const router = express.Router();
 const bucket = firebase.storage.bucket(config.bucketName);
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+router.get('/supportedList', handleError(async (req, res) => {
+  await mkdirTree(config.supportedListLocalCacheJson);
+  try {
+    // eslint-disable-next-line global-require,import/no-dynamic-require
+    const localCache = require(config.supportedListLocalCacheJson);
+    res.json(localCache);
+  } catch (err) {
+    const client = new TextToSpeechClient();
+    const [result] = await client.listVoices({});
+    const { voices } = result;
+    fs.writeFile(config.supportedListLocalCacheJson, JSON.stringify(voices),
+      () => {
+      });
+    res.json(voices);
+  }
+}));
 
 router.delete('/:filePath', handleError((req, res) => {
   const { filePath } = req.params;
