@@ -13,28 +13,6 @@ const bucket = firebase.storage.bucket(config.bucketName);
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.delete('/:filePath', handleError((req, res) => {
-  const { filePath } = req.params;
-  const file = bucket.file(filePath);
-  file.exists((err, exists) => {
-    if (exists) {
-      // eslint-disable-next-line no-unused-vars
-      file.delete(filePath, ((errRes, apiResponse) => {
-        if (errRes) {
-          const errorMessage = errRes.errors[0].message;
-          logger.error(errorMessage);
-          res.status(errRes.code).send(errorMessage);
-        } else {
-          const logInfo = `Delete file ${path.join(config.storageBaseURL,
-            filePath)}`;
-          logger.info(logInfo);
-          res.send(logInfo);
-        }
-      }));
-    }
-  });
-}));
-
 router.post('/', upload.single('audio'), handleError(async (req, res, next) => {
   if (!req.file) {
     return Promise.reject(new CallMeError({
