@@ -5,13 +5,13 @@ import cron from 'node-cron';
 import urls from './server/urls';
 import users from './users';
 import ssmlAudio from './ssmlAudio';
-import { cronTasks, errorMiddleware } from './utils';
+import { cronTasks, errorMiddleware, logger } from './utils';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}...`);
+  logger.info(`Server listening on port ${PORT}...`);
 });
 app.use(morgan('combined', {}));
 app.get('/', (req, res) => {

@@ -20,8 +20,10 @@ export const errorMiddleware = (err, req, res, next) => {
   // Handle errors here
   const isClientError = err instanceof CallMeError;
   const httpStatus = isClientError ? err.code : 500;
-  // only uncaught error will be logged
-  if (!isClientError) {
+  // uncaught error will display error stack, caught error will display error message
+  if (isClientError) {
+    logger.error(err.message);
+  } else {
     logger.error(err.stack);
   }
   res.status(httpStatus).send(
