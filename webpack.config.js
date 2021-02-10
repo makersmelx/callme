@@ -53,7 +53,7 @@ module.exports = {
     path: DIST_PATH,
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     modules: [SRC_PATH, 'node_modules'],
   },
 };
