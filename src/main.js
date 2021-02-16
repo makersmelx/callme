@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import cron from 'node-cron';
+import dotenv from 'dotenv';
 import urls from './server/urls';
 import users from './users';
 import ssmlAudio from './ssmlAudio';
@@ -9,6 +10,7 @@ import { cronTasks, errorMiddleware, logger } from './utils';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+dotenv.config();
 
 app.listen(PORT, () => {
   logger.info(`Server listening on port ${PORT}...`);

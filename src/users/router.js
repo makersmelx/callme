@@ -1,6 +1,11 @@
 import express from 'express';
 import {
-  SHA256Encrypt, handleError, logger, CallMeError, redact,
+  mozillaEncrypt,
+  handleError,
+  logger,
+  CallMeError,
+  redact,
+  mozillaPasswordCompare,
 } from '../utils';
 import firebase from '../firebase';
 import fetchSSMLAudio from './fetchSSMLAudio';
@@ -21,7 +26,7 @@ router.put('/*', handleError(async (req, res, next) => {
     }
     return Promise.resolve(doc.data());
   });
-  if (SHA256Encrypt(reqBody.password) !== serverData.password) {
+  if (!await mozillaPasswordCompare(reqBody.password, serverData.password)) {
     throw new CallMeError({
       code: 404,
       message: 'The resource you are trying to reach either does not exist or you are not authorized to view it.',
@@ -52,7 +57,7 @@ router.post('/', handleError(async (req, res) => {
   const reqBody = req.body;
   const userRef = dbCollection.doc(reqBody.username);
   const userData = {
-    password: SHA256Encrypt(reqBody.password),
+    password: await mozillaEncrypt(reqBody.password),
     names: { ...reqBody.names },
     option: { ...reqBody.option },
   };
