@@ -13,29 +13,6 @@ import fetchSSMLAudio from './fetchSSMLAudio';
 const router = express.Router();
 const dbCollection = firebase.database.collection('users');
 
-router.put('/*', handleError(async (req, res, next) => {
-  const reqBody = req.body;
-  const { username } = reqBody;
-  const userRef = dbCollection.doc(username);
-  const serverData = await userRef.get().then((doc) => {
-    if (!doc.exists) {
-      throw new CallMeError({
-        code: 404,
-        message: 'The resource you are trying to reach either does not exist or you are not authorized to view it.',
-      });
-    }
-    return Promise.resolve(doc.data());
-  });
-  if (!await mozillaPasswordCompare(reqBody.password, serverData.password)) {
-    throw new CallMeError({
-      code: 404,
-      message: 'The resource you are trying to reach either does not exist or you are not authorized to view it.',
-    });
-  }
-  req.serverData = serverData;
-  next();
-}));
-
 router.get('/:username', handleError(async (req, res) => {
   const { username } = req.params;
   const userRef = dbCollection.doc(username);
@@ -53,7 +30,20 @@ router.get('/:username', handleError(async (req, res) => {
   });
 }));
 
-router.post('/', handleError(async (req, res) => {
+router.post('/', handleError(async (req, res, next) => {
+  const reqBody = req.body;
+  const { username } = reqBody;
+  const userRef = dbCollection.doc(username);
+  await userRef.get().then((doc) => {
+    if (doc.exists) {
+      throw new CallMeError({
+        code: 403,
+        message: `User ${username} already exists.`,
+      });
+    }
+  });
+  next();
+}), handleError(async (req, res) => {
   const reqBody = req.body;
   const userRef = dbCollection.doc(reqBody.username);
   const userData = {
@@ -78,7 +68,28 @@ router.post('/', handleError(async (req, res) => {
   })));
 }));
 
-router.put('/', handleError(async (req, res) => {
+router.put('/', handleError(async (req, res, next) => {
+  const reqBody = req.body;
+  const { username } = reqBody;
+  const userRef = dbCollection.doc(username);
+  const serverData = await userRef.get().then((doc) => {
+    if (!doc.exists) {
+      throw new CallMeError({
+        code: 404,
+        message: 'The resource you are trying to reach either does not exist or you are not authorized to view it.',
+      });
+    }
+    return Promise.resolve(doc.data());
+  });
+  if (!await mozillaPasswordCompare(reqBody.password, serverData.password)) {
+    throw new CallMeError({
+      code: 404,
+      message: 'The resource you are trying to reach either does not exist or you are not authorized to view it.',
+    });
+  }
+  req.serverData = serverData;
+  next();
+}), handleError(async (req, res) => {
   const reqBody = req.body;
   const { username } = reqBody;
   const userRef = dbCollection.doc(username);
