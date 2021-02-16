@@ -24,10 +24,11 @@ const fetchSSMLAudio = async (name) => {
     try {
       await deleteFile.delete().then(() => {
         logger.info(`Delete file ${path.join(config.storageBaseURL, audio)}`);
-      }, (errRes) => Promise.reject(new CallMeError({
-        code: errRes.code,
-        message: errRes.errors[0].message,
-      })));
+      }, (errRes) => {
+        logger.warn(
+          `Fail to delete file. SSML audio update continues. Error Message: ${errRes.errors[0].message}`,
+        );
+      });
     } catch (err) {
       return Promise.reject(err);
     }
